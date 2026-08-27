@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <!--
   ============================================================
@@ -23,6 +24,8 @@
 <meta property="og:description" content="2026년 11월 22일 일요일 오전 11시, 아펠가모 반포 LL층">
 <meta property="og:image" content="images/cover.jpg">
 <!-- ↑ 카톡 등으로 공유 시 미리보기 이미지입니다. 배포 후 절대경로(https://...)로 바꿔주세요. -->
+<link rel="preload" as="image" href="images/cover.jpg">
+<!-- ↑ 헤더 사진은 가장 먼저 보이는 부분이라 우선적으로 불러오도록 힌트를 줍니다 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -260,11 +263,15 @@
   .gallery-grid{ display:flex; flex-direction:column; gap:4px; }
   .gallery-row{ display:grid; gap:4px; }
   .gallery-row button{
-    border:none; padding:0; display:block;
-    background-size:cover; background-position:center;
+    border:none; padding:0; display:block; overflow:hidden;
+    background-size:cover; background-position:center; /* 대체 그러데이션용 */
+  }
+  .gallery-row button img{
+    width:100%; height:100%; object-fit:cover; display:block;
   }
   /* 한 줄에 사진을 몇 장 넣을지, 어떤 사진을 넣을지는 JS의 GALLERY_ROWS 값으로 정합니다.
-     (3장 = 정사각형 3분할, 2장 이하 = 세로로 긴 비율) */
+     (3장 = 정사각형 3분할, 2장 이하 = 세로로 긴 비율)
+     실제 사진은 <img loading="lazy">로 불러와서, 화면에 보일 때만 로딩됩니다 */
 
   .lightbox{
     position:fixed; inset:0; background:rgba(20,16,12,.94);
@@ -551,6 +558,14 @@ const ACCOUNTS = {
 // 갤러리 사진을 "줄" 단위로 배치합니다. 한 줄에 3장을 넣으면 정사각형 3분할,
 // 2장을 넣으면 세로로 긴 2분할로 자동으로 보여요. 줄 순서/장수는 자유롭게 바꿔도 됩니다.
 // (사진 파일이 아직 없어도 GALLERY_GRADIENTS 색상이 대신 은은하게 보입니다)
+//
+// 얼굴이 잘려 보이는 사진은, 문자열 대신 { src, position } 객체로 바꿔서
+// 어느 부분을 기준으로 자를지 지정할 수 있어요. 예:
+//   'images/gallery/6.jpg'                                  → 기본값(정중앙 기준)
+//   { src: 'images/gallery/6.jpg', position: 'center top' } → 사진 위쪽을 기준으로 노출
+//   { src: 'images/gallery/6.jpg', position: 'center 25%' } → 세밀하게 숫자로 조정
+// position 값은 'center top' / 'center bottom' / 'center 20%' 처럼 자유롭게 넣어보고
+// 실제로 열어보면서 마음에 드는 값을 찾으시면 돼요.
 const GALLERY_ROWS = [
   ['images/gallery/1.jpg', 'images/gallery/2.jpg', 'images/gallery/3.jpg'],
   ['images/gallery/4.jpg', 'images/gallery/5.jpg'],
@@ -651,19 +666,27 @@ function initContacts(){
 /* ---------- 갤러리 + 라이트박스 ---------- */
 let galleryIndex = 0;
 let GALLERY_FLAT = []; // 라이트박스 이전/다음 이동용으로 GALLERY_ROWS를 한 줄로 펼친 목록
+function normalizePhoto(item){
+  // GALLERY_ROWS 항목이 문자열이면 기본(정중앙) 노출, 객체({src, position})면 지정한 위치로 노출
+  return typeof item === 'string' ? { src: item, position: 'center' } : { position: 'center', ...item };
+}
 function initGallery(){
   const grid = document.getElementById('gallery-grid');
-  GALLERY_FLAT = GALLERY_ROWS.flat();
+  GALLERY_FLAT = GALLERY_ROWS.flat().map(item => normalizePhoto(item).src);
 
   let flatIndex = 0;
   grid.innerHTML = GALLERY_ROWS.map(row => {
     const cols = row.length;
     const aspect = cols >= 3 ? '1 / 1' : '3 / 4'; // 3장=정사각형, 2장 이하=세로로 긴 비율
-    const buttons = row.map(src => {
+    const buttons = row.map(item => {
+      const photo = normalizePhoto(item);
       const gradient = GALLERY_GRADIENTS[flatIndex % GALLERY_GRADIENTS.length];
       const idx = flatIndex++;
       return `<button type="button" data-index="${idx}" aria-label="사진 ${idx+1} 크게 보기"
-        style="aspect-ratio:${aspect}; background-image:url('${src}'), ${gradient}"></button>`;
+        style="aspect-ratio:${aspect}; background-image:${gradient};">
+        <img src="${photo.src}" alt="" loading="lazy" decoding="async"
+          style="object-position:${photo.position};" onerror="this.style.display='none'">
+      </button>`;
     }).join('');
     return `<div class="gallery-row" style="grid-template-columns:repeat(${cols},1fr)">${buttons}</div>`;
   }).join('');
