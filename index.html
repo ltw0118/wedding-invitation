@@ -119,7 +119,7 @@
       url('images/cover.jpg'),
       linear-gradient(155deg, #F8E3D8 0%, #EFC2B5 55%, #E3A99C 100%);
     background-size:cover;
-    background-position:center 90%; /* 숫자가 작을수록(0%에 가까울수록) 사진 위쪽이 더 보임 */
+    background-position:center 100%; /* 숫자가 작을수록(0%에 가까울수록) 사진 위쪽이 더 보임 */
     color:#fff;
   }
   .cover::after{
@@ -588,14 +588,14 @@ const ACCOUNTS = {
 // 실제로 열어보면서 마음에 드는 값을 찾으시면 돼요.
 const GALLERY_ROWS = [
   [{src: 'images/gallery/1.jpg', position: 'center 25%'}, {src: 'images/gallery/2.jpg', position: 'center 25%'} , {src: 'images/gallery/3.jpg', position: 'center 25%'}],
-  ['images/gallery/4.jpg', 'images/gallery/5.jpg'],
-  ['images/gallery/6.jpg', 'images/gallery/7.jpg', 'images/gallery/8.jpg'],
-  ['images/gallery/9.jpg', 'images/gallery/10.jpg', 'images/gallery/11.jpg'],
+  ['images/gallery/4.jpg', {src: 'images/gallery/5.jpg', position: 'center 25%'}],
+  [{src: 'images/gallery/6.jpg', position: 'center 25%'}, 'images/gallery/7.jpg', {src: 'images/gallery/8.jpg', position: 'center 25%'}],
+  [{src: 'images/gallery/9.jpg', position: 'center 25%'},{src: 'images/gallery/10.jpg', position: 'center 50%'},{src: 'images/gallery/11.jpg', position: 'center 25%'}],
   ['images/gallery/12.jpg', 'images/gallery/13.jpg'],
-  ['images/gallery/14.jpg', 'images/gallery/15.jpg', 'images/gallery/16.jpg'],
-  ['images/gallery/17.jpg', 'images/gallery/18.jpg', 'images/gallery/19.jpg'],
+  [{src: 'images/gallery/14.jpg', position: 'center 25%'},{src: 'images/gallery/15.jpg', position: 'center 50%'},{src: 'images/gallery/16.jpg', position: 'center 50%'}],
+  [{src: 'images/gallery/17.jpg', position: 'center 25%'},{src: 'images/gallery/18.jpg', position: 'center 50%'},{src: 'images/gallery/19.jpg', position: 'center 50%'}],
   ['images/gallery/20.jpg', 'images/gallery/21.jpg'],
-  ['images/gallery/22.jpg', 'images/gallery/23.jpg', 'images/gallery/24.jpg'],
+  [{src: 'images/gallery/22.jpg', position: 'center 25%'},{src: 'images/gallery/23.jpg', position: 'center 50%'}, 'images/gallery/24.jpg'],
   ['images/gallery/25.jpg', 'images/gallery/26.jpg', 'images/gallery/27.jpg'],
   ['images/gallery/28.jpg', 'images/gallery/29.jpg'],
 ];
