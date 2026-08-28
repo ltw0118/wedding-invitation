@@ -293,18 +293,31 @@
 
   .lightbox{
     position:fixed; inset:0; background:rgba(20,16,12,.94);
-    display:none; align-items:center; justify-content:center;
-    z-index:50; padding:1.2rem;
+    display:none;
+    overflow:hidden;
+    z-index:50;
   }
-  .lightbox.open{ display:flex; }
-  .lightbox img{ max-height:82vh; max-width:100%; object-fit:contain; border-radius:2px; }
+  .lightbox.open{ display:block; }
+  .lb-track{
+    position:absolute; top:0; left:0; height:100%;
+    display:flex;
+    will-change:transform;
+  }
+  .lb-slide{
+    width:100vw; height:100%;
+    flex:0 0 100vw;
+    display:flex; align-items:center; justify-content:center;
+    padding:1.2rem;
+    box-sizing:border-box;
+  }
+  .lb-slide img{ max-height:82vh; max-width:100%; object-fit:contain; border-radius:2px; }
   .lightbox .lb-close{
-    position:absolute; top:1.2rem; right:1.2rem;
+    position:absolute; top:1.2rem; right:1.2rem; z-index:2;
     width:40px; height:40px; border-radius:50%; border:none;
     background:rgba(255,255,255,.12); color:#fff; font-size:1.4rem;
   }
   .lightbox .lb-nav{
-    position:absolute; top:50%; transform:translateY(-50%);
+    position:absolute; top:50%; transform:translateY(-50%); z-index:2;
     width:46px; height:46px; border-radius:50%;
     border:1px solid rgba(255,255,255,.4);
     background:rgba(255,255,255,.2); color:#fff;
@@ -537,7 +550,11 @@
 <div class="lightbox" id="lightbox">
   <button class="lb-close" id="lb-close" aria-label="닫기">&times;</button>
   <button class="lb-nav lb-prev" id="lb-prev" aria-label="이전 사진"><svg class="lb-nav-icon" style="transform:rotate(90deg)"><use href="#icon-chevron"/></svg></button>
-  <img id="lb-img" src="" alt="">
+  <div class="lb-track" id="lb-track">
+    <div class="lb-slide"><img id="lb-img-prev" src="" alt=""></div>
+    <div class="lb-slide"><img id="lb-img-current" src="" alt=""></div>
+    <div class="lb-slide"><img id="lb-img-next" src="" alt=""></div>
+  </div>
   <button class="lb-nav lb-next" id="lb-next" aria-label="다음 사진"><svg class="lb-nav-icon" style="transform:rotate(-90deg)"><use href="#icon-chevron"/></svg></button>
 </div>
 
@@ -742,19 +759,33 @@ function initGallery(){
     if(e.key === 'ArrowRight') stepLightbox(1);
   });
 
-  // 손가락으로 좌우 스와이프하면 이전/다음 사진으로 이동
-  let touchStartX = 0, touchStartY = 0;
+  // 손가락을 따라 사진이 실시간으로 같이 움직이는 드래그 갤러리
+  let touchStartX = 0, touchStartY = 0, touchDx = 0, touchActive = false;
   const lightboxEl = document.getElementById('lightbox');
   lightboxEl.addEventListener('touchstart', e=>{
+    if(lbIsAnimating) return;
+    touchActive = true;
+    touchDx = 0;
     touchStartX = e.changedTouches[0].clientX;
     touchStartY = e.changedTouches[0].clientY;
+    setTrackTransform(-window.innerWidth, false); // 트랜지션 없이 현재 위치 고정(드래그 준비)
   }, { passive:true });
-  lightboxEl.addEventListener('touchend', e=>{
+  lightboxEl.addEventListener('touchmove', e=>{
+    if(!touchActive) return;
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = e.changedTouches[0].clientY - touchStartY;
-    if(Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.5){
-      stepLightbox(dx < 0 ? 1 : -1);
+    if(Math.abs(dx) > Math.abs(dy)){
+      e.preventDefault(); // 가로 드래그로 판단되면 화면 스크롤 방지
+      touchDx = dx;
+      setTrackTransform(-window.innerWidth + dx, false);
     }
+  }, { passive:false });
+  lightboxEl.addEventListener('touchend', ()=>{
+    if(!touchActive) return;
+    touchActive = false;
+    const threshold = window.innerWidth * 0.18;
+    if(Math.abs(touchDx) > threshold) stepLightbox(touchDx < 0 ? 1 : -1);
+    else centerTrack(true); // 기준점을 못 넘으면 제자리로 스냅백
   }, { passive:true });
 
   // 안드로이드 등에서 뒤로가기 버튼을 누르면 페이지를 벗어나는 대신 라이트박스만 닫히도록 처리
@@ -765,9 +796,27 @@ function initGallery(){
   });
 }
 let lightboxHistoryPushed = false;
+let lbIsAnimating = false;
+
+function setSlideSrcs(){
+  const prevIdx = (galleryIndex - 1 + GALLERY_FLAT.length) % GALLERY_FLAT.length;
+  const nextIdx = (galleryIndex + 1) % GALLERY_FLAT.length;
+  document.getElementById('lb-img-prev').src = GALLERY_FLAT[prevIdx];
+  document.getElementById('lb-img-current').src = GALLERY_FLAT[galleryIndex];
+  document.getElementById('lb-img-next').src = GALLERY_FLAT[nextIdx];
+}
+function setTrackTransform(px, animate){
+  const track = document.getElementById('lb-track');
+  track.style.transition = animate ? 'transform .32s cubic-bezier(.22,.68,0,1)' : 'none';
+  track.style.transform = `translateX(${px}px)`;
+}
+function centerTrack(animate){
+  setTrackTransform(-window.innerWidth, animate);
+}
 function openLightbox(i){
   galleryIndex = i;
-  document.getElementById('lb-img').src = GALLERY_FLAT[i];
+  setSlideSrcs();
+  centerTrack(false);
   document.getElementById('lightbox').classList.add('open');
   if(!lightboxHistoryPushed){
     history.pushState({ lightbox: true }, '', location.href);
@@ -775,8 +824,16 @@ function openLightbox(i){
   }
 }
 function stepLightbox(dir){
-  galleryIndex = (galleryIndex + dir + GALLERY_FLAT.length) % GALLERY_FLAT.length;
-  document.getElementById('lb-img').src = GALLERY_FLAT[galleryIndex];
+  if(lbIsAnimating) return;
+  lbIsAnimating = true;
+  const target = dir > 0 ? -window.innerWidth * 2 : 0; // 다음=왼쪽 끝까지, 이전=오른쪽 끝까지 밀어서 보여줌
+  setTrackTransform(target, true);
+  setTimeout(()=>{
+    galleryIndex = (galleryIndex + dir + GALLERY_FLAT.length) % GALLERY_FLAT.length;
+    setSlideSrcs();
+    centerTrack(false); // 다음 사진 기준으로 화면 티 안 나게 재정렬
+    lbIsAnimating = false;
+  }, 320);
 }
 function closeLightbox(fromPopstate){
   document.getElementById('lightbox').classList.remove('open');
