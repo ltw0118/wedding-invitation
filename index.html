@@ -125,20 +125,21 @@
   .cover::after{
     content:'';
     position:absolute; inset:0;
-    background:linear-gradient(to top, rgba(58,51,44,.55) 0%, rgba(58,51,44,.12) 42%, rgba(58,51,44,.08) 100%);
+    background:linear-gradient(
+      to bottom,
+      rgba(58,51,44,.4) 0%,
+      rgba(58,51,44,.04) 16%,
+      rgba(58,51,44,.04) 55%,
+      rgba(58,51,44,.58) 100%
+    );
     pointer-events:none;
   }
   .cover-top, .cover-bottom{ position:relative; z-index:1; }
   .cover-kicker{
-    display:inline-block;
     font-size:.68rem;
     letter-spacing:.32em;
     opacity:.95;
-    padding:.5rem 1.1rem;
-    background:rgba(58,51,44,.38);
-    backdrop-filter:blur(6px);
-    -webkit-backdrop-filter:blur(6px);
-    border-radius:999px;
+    text-shadow:0 1px 8px rgba(0,0,0,.4);
   }
   .cover-lines{
     font-family:var(--font-header);
