@@ -295,6 +295,7 @@
     position:fixed; inset:0; background:rgba(20,16,12,.94);
     display:none;
     overflow:hidden;
+    touch-action:none; /* 브라우저 기본 스크롤/줌 제스처를 막고, 좌우 드래그만 우리가 직접 처리 */
     z-index:50;
   }
   .lightbox.open{ display:block; }
@@ -772,10 +773,10 @@ function initGallery(){
   }, { passive:true });
   lightboxEl.addEventListener('touchmove', e=>{
     if(!touchActive) return;
+    e.preventDefault(); // 위아래로 밀어도 배경/페이지가 절대 스크롤되지 않도록 항상 차단
     const dx = e.changedTouches[0].clientX - touchStartX;
     const dy = e.changedTouches[0].clientY - touchStartY;
     if(Math.abs(dx) > Math.abs(dy)){
-      e.preventDefault(); // 가로 드래그로 판단되면 화면 스크롤 방지
       touchDx = dx;
       setTrackTransform(-window.innerWidth + dx, false);
     }
@@ -818,6 +819,7 @@ function openLightbox(i){
   setSlideSrcs();
   centerTrack(false);
   document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden'; // 라이트박스 열린 동안 배경 페이지 스크롤 잠금
   if(!lightboxHistoryPushed){
     history.pushState({ lightbox: true }, '', location.href);
     lightboxHistoryPushed = true;
@@ -837,6 +839,7 @@ function stepLightbox(dir){
 }
 function closeLightbox(fromPopstate){
   document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = ''; // 배경 페이지 스크롤 잠금 해제
   if(lightboxHistoryPushed){
     lightboxHistoryPushed = false;
     if(!fromPopstate) history.back(); // 뒤로가기가 아니라 X/배경 클릭으로 닫았을 때는, 추가해둔 기록을 정리합니다
