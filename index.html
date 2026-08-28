@@ -29,7 +29,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Song+Myung&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Song+Myung&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 
@@ -50,6 +50,7 @@
     --color-line:        #EBDFD0;   /* 구분선 */
 
     --font-display: 'Song Myung', 'Noto Serif KR', serif;
+    --font-header: 'Gowun Dodum', 'Pretendard', sans-serif; /* 헤더 전용 폰트 */
     --font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
 
     --container-w: 480px;
@@ -113,7 +114,8 @@
     max-height:620px;
     display:flex;
     flex-direction:column;
-    justify-content:space-between;
+    justify-content:flex-end; /* 텍스트를 헤더 하단 쪽으로 모아서 배치 (기존 space-between이었음) */
+    gap:2.4rem; /* 위쪽 킥커 문구와 아래쪽 이름/날짜 사이 간격 */
     padding:2.2rem 1.75rem 2.4rem;
     background-image:
       url('images/cover.jpg'),
@@ -135,16 +137,16 @@
     opacity:.9;
   }
   .cover-lines{
-    font-family:var(--font-display);
+    font-family:var(--font-header);
     font-size:clamp(1rem,4.4vw,1.2rem);
     line-height:1.6;
     margin-bottom:1.1rem;
     text-shadow:0 2px 12px rgba(0,0,0,.25);
   }
   .cover-names{
-    font-family:var(--font-display);
+    font-family:var(--font-header);
     font-size:clamp(1.9rem,8vw,2.5rem);
-    letter-spacing:.02em;
+    letter-spacing:.06em;
     margin-bottom:.8rem;
     text-shadow:0 2px 14px rgba(0,0,0,.3);
   }
@@ -279,7 +281,7 @@
     z-index:50; padding:1.2rem;
   }
   .lightbox.open{ display:flex; }
-  .lightbox img{ max-height:82vh; border-radius:2px; }
+  .lightbox img{ max-height:82vh; max-width:100%; object-fit:contain; border-radius:2px; }
   .lightbox .lb-close{
     position:absolute; top:1.2rem; right:1.2rem;
     width:40px; height:40px; border-radius:50%; border:none;
@@ -567,7 +569,7 @@ const ACCOUNTS = {
 // position 값은 'center top' / 'center bottom' / 'center 20%' 처럼 자유롭게 넣어보고
 // 실제로 열어보면서 마음에 드는 값을 찾으시면 돼요.
 const GALLERY_ROWS = [
-  [{src:'images/gallery/1.jpg', position: 'center 30%'}, 'images/gallery/2.jpg', 'images/gallery/3.jpg'],
+  ['images/gallery/1.jpg', 'images/gallery/2.jpg', 'images/gallery/3.jpg'],
   ['images/gallery/4.jpg', 'images/gallery/5.jpg'],
   ['images/gallery/6.jpg', 'images/gallery/7.jpg', 'images/gallery/8.jpg'],
   ['images/gallery/9.jpg', 'images/gallery/10.jpg', 'images/gallery/11.jpg'],
