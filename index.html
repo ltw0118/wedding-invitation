@@ -107,8 +107,8 @@
   /* ---------- 커버 ---------- */
   .cover{
     position:relative;
-    height:80vh;
-    height:80svh;
+    height:80vh; /* JS 미지원 브라우저용 대체값 */
+    height:calc(var(--vh, 1vh) * 80); /* 스크롤 시 모바일 주소창이 접혀도 흔들리지 않도록 고정 */
     min-height:560px;
     max-height:760px;
     display:flex;
@@ -604,6 +604,16 @@ const GALLERY_GRADIENTS = [
    구현부 — 보통은 그대로 두셔도 됩니다
    ============================================================ */
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- 모바일 주소창 접힘 대응 ---------- */
+// 스크롤 중 주소창이 접히면서 생기는 흔들림을 막기 위해, 처음 로드 시 딱 한 번만
+// 높이를 측정해서 고정합니다. (resize 이벤트는 일부 안드로이드 브라우저에서
+// 주소창 접힘에도 반응해서 다시 흔들릴 수 있어 일부러 사용하지 않았습니다)
+function lockViewportHeight(){
+  document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+}
+lockViewportHeight();
+window.addEventListener('orientationchange', lockViewportHeight);
 
 function showToast(msg){
   const t = document.getElementById('toast');
