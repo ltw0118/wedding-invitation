@@ -28,7 +28,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Song+Myung&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
 <link rel="stylesheet" as="style" crossorigin
   href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 
@@ -48,7 +48,7 @@
     --color-gold:        #B78E58;   /* 골드 (예식일 강조, 이전보다 밝게) */
     --color-line:        #EBDFD0;   /* 구분선 */
 
-    --font-display: 'Song Myung', 'Noto Serif KR', serif;
+    --font-display: 'Gowun Dodum', 'Pretendard', sans-serif;
     --font-header: 'Gowun Dodum', 'Pretendard', sans-serif; /* 헤더 전용 폰트 */
     --font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
 
@@ -113,14 +113,13 @@
     max-height:760px;
     display:flex;
     flex-direction:column;
-    justify-content:flex-end; /* 모든 텍스트를 헤더 맨 아래로 모아서 배치 */
-    gap:.9rem; /* 킥커 문구와 인사말 사이 간격 (좁게 붙여서 하나의 덩어리처럼) */
+    justify-content:space-between; /* 위쪽엔 WEDDING INVITATION, 아래쪽엔 나머지 텍스트 */
     padding:2.2rem 1.75rem 2.6rem;
     background-image:
       url('images/cover.jpg'),
       linear-gradient(155deg, #F8E3D8 0%, #EFC2B5 55%, #E3A99C 100%);
     background-size:cover;
-    background-position: center 90%;
+    background-position:center 25%; /* 숫자가 작을수록(0%에 가까울수록) 사진 위쪽이 더 보임 */
     color:#fff;
   }
   .cover::after{
@@ -216,6 +215,10 @@
     font-size:.88rem;
   }
   .contact-row:last-child{ border-bottom:none; }
+  .contact-row.groom-group-end{
+    border-bottom:1px solid var(--color-rose-deep);
+    padding-bottom:1rem;
+  }
   .contact-row .who .role{ font-size:.68rem; color:var(--color-rose-deep); letter-spacing:.1em; }
   .contact-row .who .name{ font-size:.95rem; margin-top:.1rem; }
   .contact-row .icons{ display:flex; gap:.5rem; }
@@ -226,9 +229,9 @@
     color:var(--color-green);
   }
   .icon-btn svg{ width:15px; height:15px; }
-  .transit-row{ align-items:flex-start; gap:1rem; }
+  .transit-row{ align-items:flex-start; justify-content:flex-start; gap:1rem; }
   .transit-row .label{ flex:0 0 64px; font-size:.72rem; letter-spacing:.1em; color:var(--color-rose-deep); padding-top:.15rem; }
-  .transit-row p{ font-size:.86rem; color:var(--color-ink-soft); }
+  .transit-row p{ flex:1; font-size:.86rem; color:var(--color-ink-soft); }
 
   /* ---------- 캘린더 ---------- */
   .calendar-headline{ font-family:var(--font-display); font-size:clamp(1.5rem,6vw,1.85rem); margin-bottom:.4rem; }
@@ -473,7 +476,7 @@
         </div>
         <div class="transit-row">
           <div class="label">주차</div>
-          <p>건물 내 지하주차장을 이용하실 수 있으며, 하객 대상 무료 주차 시간이 제공됩니다. (정확한 무료 시간은 예식장에 확인해 주세요)</p>
+          <p>반포 효성빌딩 건물 내 2시간 무료 주차 가능합니다.</p>
         </div>
       </div>
     </details>
@@ -485,7 +488,9 @@
     <p class="gift-msg">
       전해주시는 따뜻한 축하의 마음을<br>
       오래도록 간직하며<br>
-      행복한 모습으로 보답하며 살겠습니다.
+      행복한 모습으로 보답하며 살겠습니다.<br><br>
+      축하의 마음만으로도 저희에게는 큰 선물입니다.<br>
+      화환은 정중히 사양하오니 너그러이 양해 부탁드립니다.
     </p>
     <div class="gift-accordions">
       <details class="accordion">
@@ -654,8 +659,8 @@ function initCalendar(){
 /* ---------- 혼주 연락처 ---------- */
 function initContacts(){
   const wrap = document.getElementById('contact-list');
-  wrap.innerHTML = CONTACTS.map(c => `
-    <div class="contact-row">
+  wrap.innerHTML = CONTACTS.map((c, i) => `
+    <div class="contact-row${c.role === '신랑 어머니' ? ' groom-group-end' : ''}">
       <div class="who"><div class="role">${c.role}</div><div class="name">${c.name}</div></div>
       <div class="icons">
         <a class="icon-btn" href="tel:${c.phone}" aria-label="${c.name}에게 전화"><svg><use href="#icon-call"/></svg></a>
